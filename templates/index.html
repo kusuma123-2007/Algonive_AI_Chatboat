@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Customer Support Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 400px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #4a90e2;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-body {
+            padding: 10px;
+            height: 350px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .chat-message {
+            margin: 5px 0;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 16px;
+            clear: both;
+        }
+        .user-message {
+            background: #4a90e2;
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        .bot-message {
+            background: #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        .chat-footer {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+        .chat-footer input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .chat-footer button {
+            border: none;
+            padding: 10px 15px;
+            background: #4a90e2;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .chat-footer button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        AI Customer Support Chatbot
+    </div>
+    <div class="chat-body" id="chat-body">
+        <div class="chat-message bot-message">
+            Hello! 👋 I am your AI support assistant. How can I help you today?
+        </div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="user-input" placeholder="Type your message..." onkeydown="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const inputField = document.getElementById("user-input");
+        const chatBody = document.getElementById("chat-body");
+        const message = inputField.value.trim();
+        if (!message) return;
+
+        // Add user message to chat
+        const userDiv = document.createElement("div");
+        userDiv.className = "chat-message user-message";
+        userDiv.innerText = message;
+        chatBody.appendChild(userDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        inputField.value = "";
+
+        // Send message to backend
+        try {
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            const botReply = data.reply;
+
+            // Add bot reply to chat
+            const botDiv = document.createElement("div");
+            botDiv.className = "chat-message bot-message";
+            botDiv.innerText = botReply;
+            chatBody.appendChild(botDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+        } catch (error) {
+            const botDiv = document.createElement("div");
+            botDiv.className = "chat-message bot-message";
+            botDiv.innerText = "Error connecting to server.";
+            chatBody.appendChild(botDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    }
+
+    function handleKey(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+</script>
+</body>
+</html>
